@@ -1,0 +1,55 @@
+name: CI - Security Controls
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-assess:
+    name: Test and run mock assessment
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Run mock security assessment
+        run: python -m src.main --mode mock
+
+      - name: Validate generated outputs
+        run: |
+          test -s findings/findings.json
+          test -s reports/compliance-report.md
+
+      - name: Upload assessment artifacts
+        if: always() && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloud-security-assessment
+          path: |
+            findings/findings.json
+            reports/compliance-report.md
+          if-no-files-found: error
+          retention-days: 14

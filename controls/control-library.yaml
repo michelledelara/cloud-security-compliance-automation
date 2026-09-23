@@ -1,0 +1,72 @@
+controls:
+  - id: S3-01
+    title: Block public access on S3
+    service: s3
+    severity: CRITICAL
+    nist_csf_2_0: ["PR.DS", "PR.PS"]
+    lgpd: ["Art. 46", "Art. 49"]
+    recommendation: "Enable all S3 Block Public Access settings and review bucket policies/ACLs."
+
+  - id: IAM-01
+    title: MFA enabled for console users
+    service: iam
+    severity: HIGH
+    nist_csf_2_0: ["PR.AA"]
+    lgpd: ["Art. 46", "Art. 49"]
+    recommendation: "Require MFA for all IAM users with console access."
+
+  - id: CT-01
+    title: CloudTrail enabled
+    service: cloudtrail
+    severity: HIGH
+    nist_csf_2_0: ["DE.CM"]
+    lgpd: ["Art. 46", "Art. 49"]
+    recommendation: "Enable an organization or multi-region CloudTrail with protected log storage."
+
+  - id: SG-01
+    title: Sensitive ports not open to the internet
+    service: ec2
+    severity: HIGH
+    nist_csf_2_0: ["PR.PS"]
+    lgpd: ["Art. 46"]
+    recommendation: "Restrict inbound access to sensitive ports and trusted CIDR ranges."
+
+  - id: S3-02
+    title: S3 default encryption enabled
+    service: s3
+    severity: HIGH
+    nist_csf_2_0: ["PR.DS"]
+    lgpd: ["Art. 46"]
+    recommendation: "Enable default server-side encryption for the bucket."
+
+  - id: RDS-01
+    title: RDS storage encryption enabled
+    service: rds
+    severity: HIGH
+    nist_csf_2_0: ["PR.DS"]
+    lgpd: ["Art. 46"]
+    recommendation: "Use encrypted RDS storage and an appropriate KMS key."
+
+  - id: LOG-01
+    title: S3 access logging enabled
+    service: s3
+    severity: MEDIUM
+    nist_csf_2_0: ["DE.CM"]
+    lgpd: ["Art. 46"]
+    recommendation: "Enable access logging or an equivalent centralized logging strategy."
+
+  - id: IAM-02
+    title: Avoid broad star IAM permissions
+    service: iam
+    severity: CRITICAL
+    nist_csf_2_0: ["PR.AA"]
+    lgpd: ["Art. 46"]
+    recommendation: "Replace broad Action='*' and Resource='*' grants with least-privilege permissions."
+
+  - id: TAG-01
+    title: Required tags present
+    service: multi
+    severity: LOW
+    nist_csf_2_0: ["ID.AM"]
+    lgpd: ["Art. 46"]
+    recommendation: "Apply required governance tags such as Owner, Environment and DataClassification."

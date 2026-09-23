@@ -4,7 +4,7 @@
 
 **AWS · Python · Boto3 · NIST CSF 2.0 · LGPD · Security Controls · Evidence Automation**
 
-A practical Cloud Security and GRC automation project that converts AWS configuration data into repeatable security-control tests, structured findings, evidence, risk ratings, and compliance-oriented reporting.
+A practical Cloud Security and GRC automation project that converts AWS configuration data into repeatable security-control tests, structured findings, evidence, risk ratings, reports, and an automatically generated security dashboard.
 
 ## Why this project exists
 
@@ -12,7 +12,7 @@ Cloud security assessments are often performed manually: analysts inspect AWS se
 
 This project demonstrates a more reproducible approach:
 
-**AWS → Python/Boto3 → Control Tests → Findings → Risk → Evidence → Report**
+**AWS → Python/Boto3 → Control Tests → Findings → Risk → Evidence → Report → Dashboard**
 
 The goal is not to replace professional judgment. It is to automate repeatable evidence collection and first-level control validation so that analysts can spend more time on risk analysis, remediation, and governance.
 
@@ -27,10 +27,27 @@ The goal is not to replace professional judgment. It is to automate repeatable e
 | S3-02 | Default encryption enabled | Amazon S3 |
 | RDS-01 | Storage encryption enabled | Amazon RDS |
 | LOG-01 | S3 access logging enabled | Amazon S3 |
-| IAM-02 | Avoid broad `*:*\` customer-managed IAM policies | AWS IAM |
+| IAM-02 | Avoid broad `*:*` customer-managed IAM policies | AWS IAM |
 | TAG-01 | Required tags present | S3 / EC2 / RDS |
 
 Framework mappings are intentionally treated as **illustrative control mappings**, not legal conclusions or audit certification.
+
+## Automated dashboard
+
+Every assessment now generates `reports/dashboard.html`.
+
+The dashboard shows:
+
+- overall technical posture (PASS / total resource-level checks);
+- PASS and FAIL totals;
+- failed findings by severity;
+- checks and posture by AWS service;
+- NIST CSF 2.0 mapping coverage and failed mapped checks;
+- LGPD reference mapping coverage and failed mapped checks;
+- prioritized findings and remediation guidance;
+- a complete control-check table.
+
+**Important:** the technical posture metric is not an LGPD compliance score, audit opinion, or certification.
 
 ## Project structure
 
@@ -46,6 +63,7 @@ cloud-security-compliance-automation/
 │   ├── __init__.py
 │   ├── aws_collector.py
 │   ├── checks.py
+│   ├── dashboard.py
 │   ├── evaluate.py
 │   ├── main.py
 │   └── report.py
@@ -58,7 +76,8 @@ cloud-security-compliance-automation/
 │   ├── methodology.md
 │   └── framework-mapping.md
 └── tests/
-    └── test_checks.py
+    ├── test_checks.py
+    └── test_dashboard.py
 ```
 
 ## Quick start — mock mode
@@ -73,6 +92,9 @@ The script reads `sample_data/aws_inventory.json` and generates:
 
 - `findings/findings.json`
 - `reports/compliance-report.md`
+- `reports/dashboard.html`
+
+Open `reports/dashboard.html` in a browser to view the dashboard.
 
 ## Live AWS mode
 
@@ -103,8 +125,9 @@ The CI pipeline:
 3. installs the declared dependencies;
 4. runs the unit-test suite;
 5. executes the mock cloud-security assessment;
-6. validates that findings and the compliance report were generated;
-7. publishes the generated assessment files as a downloadable workflow artifact.
+6. generates JSON findings, the Markdown report, and the HTML dashboard;
+7. validates the generated outputs;
+8. publishes all three assessment outputs as a downloadable workflow artifact.
 
 This provides a repeatable validation layer for the control logic before future integrations with live AWS evidence sources.
 
@@ -114,6 +137,7 @@ This provides a repeatable validation layer for the control logic before future 
 {
   "control_id": "IAM-01",
   "title": "MFA enabled for console users",
+  "service": "iam",
   "status": "FAIL",
   "severity": "HIGH",
   "resource": "user/alice",
@@ -136,7 +160,7 @@ This provides a repeatable validation layer for the control logic before future 
 - Human validation before governance or legal conclusions
 - Version-controlled control logic
 - Explicit framework mappings
-- Reproducible reports
+- Reproducible reports and dashboards
 
 ## Roadmap
 
@@ -145,14 +169,15 @@ This provides a repeatable validation layer for the control logic before future 
 - [x] JSON findings
 - [x] Markdown compliance report
 - [x] NIST CSF 2.0 + LGPD mappings
+- [x] HTML security-control dashboard
+- [x] GitHub Actions security pipeline
+- [x] Dashboard unit test
 - [ ] CIS AWS Foundations mappings
 - [ ] ISO/IEC 27001 mappings
 - [ ] CSV export
-- [ ] HTML dashboard
-- [x] GitHub Actions security pipeline
-- [ ] Unit-test expansion
 - [ ] AWS Security Hub / Config integration
 - [ ] Evidence history and control trend analysis
+- [ ] Optional GitHub Pages dashboard publication
 
 ## Author
 

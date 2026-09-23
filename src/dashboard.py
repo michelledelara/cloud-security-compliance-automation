@@ -3,10 +3,18 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from html import escape
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, List
 
 
 SEVERITY_ORDER = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, "INFO": 4}
+SERVICE_NAMES = {
+    "s3": "Amazon S3",
+    "iam": "AWS IAM",
+    "cloudtrail": "AWS CloudTrail",
+    "ec2": "Amazon EC2",
+    "rds": "Amazon RDS",
+    "multi": "Multi-service",
+}
 SERVICE_FALLBACK = {
     "S3": "Amazon S3",
     "IAM": "AWS IAM",
@@ -19,8 +27,9 @@ SERVICE_FALLBACK = {
 
 
 def _service_for(finding: Dict[str, Any]) -> str:
-    if finding.get("service"):
-        return str(finding["service"])
+    raw_service = str(finding.get("service", "")).strip()
+    if raw_service:
+        return SERVICE_NAMES.get(raw_service.lower(), raw_service)
     prefix = str(finding.get("control_id", "")).split("-", 1)[0]
     return SERVICE_FALLBACK.get(prefix, "Other")
 
@@ -29,13 +38,13 @@ def _percent(part: int, whole: int) -> float:
     return round((part / whole) * 100, 1) if whole else 0.0
 
 
-def _bar(label: str, value: int, total: int, detail: str = "") -> str:
+def _bar(label: str, value: int, total: int) -> str:
     pct = _percent(value, total)
     return f"""
     <div class="bar-row">
       <div class="bar-label">
         <span>{escape(label)}</span>
-        <span>{value}{escape(detail)}</span>
+        <span>{value}</span>
       </div>
       <div class="bar-track"><div class="bar-fill" style="width:{pct}%"></div></div>
     </div>
@@ -44,7 +53,8 @@ def _bar(label: str, value: int, total: int, detail: str = "") -> str:
 
 def _framework_rows(all_counts: Counter, failed_counts: Counter) -> str:
     if not all_counts:
-        return '<p class="muted">No mappings available.</p>'
+        return '<tr><td colspan="4" class="muted">No mappings available.</td></tr>'
+
     rows = []
     for name, total in sorted(all_counts.items(), key=lambda item: (-item[1], item[0])):
         failed = failed_counts.get(name, 0)
@@ -76,13 +86,16 @@ def build_dashboard(
         if f.get("status") == "FAIL"
     )
 
-    service_stats: Dict[str, Dict[str, int]] = defaultdict(lambda: {"total": 0, "pass": 0, "fail": 0})
+    service_stats: Dict[str, Dict[str, int]] = defaultdict(
+        lambda: {"total": 0, "pass": 0, "fail": 0}
+    )
     nist_all, nist_fail = Counter(), Counter()
     lgpd_all, lgpd_fail = Counter(), Counter()
 
     for finding in findings:
         service = _service_for(finding)
         service_stats[service]["total"] += 1
+
         if finding.get("status") == "PASS":
             service_stats[service]["pass"] += 1
         elif finding.get("status") == "FAIL":
@@ -146,11 +159,13 @@ def build_dashboard(
         ),
     ):
         status = escape(str(finding.get("status", "")))
+        status_class = "fail" if finding.get("status") == "FAIL" else "pass"
         severity = escape(str(finding.get("severity", "")))
+
         findings_rows.append(
             "<tr>"
             f"<td>{escape(str(finding.get('control_id', '')))}</td>"
-            f'<td><span class="badge {"fail" if status == "FAIL" else "pass"}">{status}</span></td>'
+            f'<td><span class="badge {status_class}">{status}</span></td>'
             f"<td>{severity}</td>"
             f"<td>{escape(_service_for(finding))}</td>"
             f"<td><code>{escape(str(finding.get('resource', '')))}</code></td>"

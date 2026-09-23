@@ -1,5 +1,7 @@
 # Cloud Security & Compliance Automation Lab
 
+[![CI - Security Controls](https://github.com/michelledelara/cloud-security-compliance-automation/actions/workflows/ci.yml/badge.svg)](https://github.com/michelledelara/cloud-security-compliance-automation/actions/workflows/ci.yml)
+
 **AWS · Python · Boto3 · NIST CSF 2.0 · LGPD · Security Controls · Evidence Automation**
 
 A practical Cloud Security and GRC automation project that converts AWS configuration data into repeatable security-control tests, structured findings, evidence, risk ratings, and compliance-oriented reporting.
@@ -90,6 +92,22 @@ python -m src.main --mode live --region us-east-1
 
 The live collector uses Boto3 to retrieve configuration metadata. The project is designed for assessment only and does not remediate or modify cloud resources.
 
+## Continuous Integration
+
+GitHub Actions runs automatically on every push and pull request, and can also be started manually.
+
+The CI pipeline:
+
+1. checks out the repository;
+2. tests the project on Python 3.11 and 3.12;
+3. installs the declared dependencies;
+4. runs the unit-test suite;
+5. executes the mock cloud-security assessment;
+6. validates that findings and the compliance report were generated;
+7. publishes the generated assessment files as a downloadable workflow artifact.
+
+This provides a repeatable validation layer for the control logic before future integrations with live AWS evidence sources.
+
 ## Example finding
 
 ```json
@@ -131,7 +149,7 @@ The live collector uses Boto3 to retrieve configuration metadata. The project is
 - [ ] ISO/IEC 27001 mappings
 - [ ] CSV export
 - [ ] HTML dashboard
-- [ ] GitHub Actions security pipeline
+- [x] GitHub Actions security pipeline
 - [ ] Unit-test expansion
 - [ ] AWS Security Hub / Config integration
 - [ ] Evidence history and control trend analysis

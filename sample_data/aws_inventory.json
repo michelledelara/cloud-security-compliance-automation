@@ -1,0 +1,59 @@
+{
+  "account_id": "123456789012",
+  "region": "us-east-1",
+  "required_tags": ["Owner", "Environment", "DataClassification"],
+  "s3_buckets": [
+    {
+      "name": "novashop-customer-data",
+      "public_access_block": {
+        "BlockPublicAcls": true,
+        "IgnorePublicAcls": true,
+        "BlockPublicPolicy": true,
+        "RestrictPublicBuckets": true
+      },
+      "policy_is_public": false,
+      "encryption_enabled": true,
+      "logging_enabled": true,
+      "tags": {
+        "Owner": "Security",
+        "Environment": "prod",
+        "DataClassification": "confidential"
+      }
+    },
+    {
+      "name": "novashop-marketing-assets",
+      "public_access_block": {},
+      "policy_is_public": true,
+      "encryption_enabled": false,
+      "logging_enabled": false,
+      "tags": {"Environment": "prod"}
+    }
+  ],
+  "iam_users": [
+    {"name": "alice", "password_enabled": true, "mfa_active": false},
+    {"name": "automation-reader", "password_enabled": false, "mfa_active": false}
+  ],
+  "iam_policies": [
+    {
+      "name": "ReadOnlyAuditPolicy",
+      "customer_managed": true,
+      "statements": [{"Effect": "Allow", "Action": ["s3:Get*", "iam:Get*", "iam:List*"], "Resource": "*"}]
+    },
+    {
+      "name": "LegacyAdminPolicy",
+      "customer_managed": true,
+      "statements": [{"Effect": "Allow", "Action": "*", "Resource": "*"}]
+    }
+  ],
+  "cloudtrails": [{"name": "org-security-trail", "is_logging": true, "multi_region": true}],
+  "security_groups": [
+    {"group_id": "sg-001", "name": "web", "ingress": [{"protocol": "tcp", "from_port": 443, "to_port": 443, "cidr": "0.0.0.0/0"}]},
+    {"group_id": "sg-002", "name": "legacy-admin", "ingress": [{"protocol": "tcp", "from_port": 22, "to_port": 22, "cidr": "0.0.0.0/0"}]}
+  ],
+  "rds_instances": [
+    {"identifier": "novashop-db", "storage_encrypted": false, "tags": {"Owner": "Data", "Environment": "prod"}}
+  ],
+  "ec2_instances": [
+    {"instance_id": "i-0123456789abcdef0", "tags": {"Owner": "Platform", "Environment": "prod", "DataClassification": "internal"}}
+  ]
+}

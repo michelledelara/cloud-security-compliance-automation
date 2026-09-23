@@ -42,6 +42,8 @@ jobs:
         run: |
           test -s findings/findings.json
           test -s reports/compliance-report.md
+          test -s reports/dashboard.html
+          grep -q "Security Control Dashboard" reports/dashboard.html
 
       - name: Upload assessment artifacts
         if: always() && matrix.python-version == '3.12'
@@ -51,5 +53,6 @@ jobs:
           path: |
             findings/findings.json
             reports/compliance-report.md
+            reports/dashboard.html
           if-no-files-found: error
           retention-days: 14

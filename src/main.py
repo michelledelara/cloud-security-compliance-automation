@@ -2,6 +2,7 @@ from __future__ import annotations
 import argparse, json
 from pathlib import Path
 import yaml
+from .dashboard import build_dashboard
 from .evaluate import evaluate
 from .report import build_markdown_report
 
@@ -27,12 +28,33 @@ def main():
     findings = evaluate(inventory, library)
     (ROOT/"findings").mkdir(exist_ok=True)
     (ROOT/"reports").mkdir(exist_ok=True)
-    (ROOT/"findings"/"findings.json").write_text(json.dumps(findings, indent=2, ensure_ascii=False), encoding="utf-8")
-    (ROOT/"reports"/"compliance-report.md").write_text(
-        build_markdown_report(findings, inventory.get("account_id","unknown"), inventory.get("region",args.region)),
-        encoding="utf-8"
+
+    account_id = inventory.get("account_id", "unknown")
+    region = inventory.get("region", args.region)
+
+    findings_path = ROOT/"findings"/"findings.json"
+    report_path = ROOT/"reports"/"compliance-report.md"
+    dashboard_path = ROOT/"reports"/"dashboard.html"
+
+    findings_path.write_text(
+        json.dumps(findings, indent=2, ensure_ascii=False),
+        encoding="utf-8",
     )
-    print(f"Assessment complete: {sum(f['status']=='PASS' for f in findings)} PASS / {sum(f['status']=='FAIL' for f in findings)} FAIL")
+    report_path.write_text(
+        build_markdown_report(findings, account_id, region),
+        encoding="utf-8",
+    )
+    dashboard_path.write_text(
+        build_dashboard(findings, account_id, region),
+        encoding="utf-8",
+    )
+
+    passed = sum(f["status"] == "PASS" for f in findings)
+    failed = sum(f["status"] == "FAIL" for f in findings)
+    print(f"Assessment complete: {passed} PASS / {failed} FAIL")
+    print(f"Findings:  {findings_path}")
+    print(f"Report:    {report_path}")
+    print(f"Dashboard: {dashboard_path}")
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,92 @@
+[
+  {
+    "control_id": "S3-01",
+    "title": "Block public access on S3",
+    "status": "PASS",
+    "severity": "INFO",
+    "resource": "s3://novashop-customer-data",
+    "evidence": {
+      "public_access_block": {
+        "BlockPublicAcls": true,
+        "IgnorePublicAcls": true,
+        "BlockPublicPolicy": true,
+        "RestrictPublicBuckets": true
+      },
+      "policy_is_public": false
+    },
+    "nist_csf_2_0": ["PR.DS", "PR.PS"],
+    "lgpd": ["Art. 46", "Art. 49"],
+    "recommendation": "Enable all S3 Block Public Access settings and review bucket policies/ACLs."
+  },
+  {
+    "control_id": "S3-01",
+    "title": "Block public access on S3",
+    "status": "FAIL",
+    "severity": "CRITICAL",
+    "resource": "s3://novashop-marketing-assets",
+    "evidence": {
+      "public_access_block": {},
+      "policy_is_public": true
+    },
+    "nist_csf_2_0": ["PR.DS", "PR.PS"],
+    "lgpd": ["Art. 46", "Art. 49"],
+    "recommendation": "Enable all S3 Block Public Access settings and review bucket policies/ACLs."
+  },
+  {
+    "control_id": "IAM-01",
+    "title": "MFA enabled for console users",
+    "status": "FAIL",
+    "severity": "HIGH",
+    "resource": "user/alice",
+    "evidence": {
+      "password_enabled": true,
+      "mfa_active": false
+    },
+    "nist_csf_2_0": ["PR.AA"],
+    "lgpd": ["Art. 46", "Art. 49"],
+    "recommendation": "Require MFA for all IAM users with console access."
+  },
+  {
+    "control_id": "CT-01",
+    "title": "CloudTrail enabled",
+    "status": "PASS",
+    "severity": "INFO",
+    "resource": "account/cloudtrail",
+    "evidence": {
+      "trails": [
+        {
+          "name": "org-security-trail",
+          "is_logging": true,
+          "multi_region": true
+        }
+      ]
+    },
+    "nist_csf_2_0": ["DE.CM"],
+    "lgpd": ["Art. 46", "Art. 49"],
+    "recommendation": "Enable an organization or multi-region CloudTrail with protected log storage."
+  },
+  {
+    "control_id": "SG-01",
+    "title": "Sensitive ports not open to the internet",
+    "status": "FAIL",
+    "severity": "HIGH",
+    "resource": "security-group/sg-002",
+    "evidence": {
+      "name": "legacy-admin",
+      "violations": [
+        {
+          "rule": {
+            "protocol": "tcp",
+            "from_port": 22,
+            "to_port": 22,
+            "cidr": "0.0.0.0/0"
+          },
+          "sensitive_ports": [22]
+        }
+      ]
+    },
+    "nist_csf_2_0": ["PR.PS"],
+    "lgpd": ["Art. 46"],
+    "recommendation": "Restrict inbound access to sensitive ports and trusted CIDR ranges."
+  }
+]

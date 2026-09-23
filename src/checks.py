@@ -7,6 +7,7 @@ def make_finding(control, status, resource, evidence, recommendation=None):
     return {
         "control_id": control["id"],
         "title": control["title"],
+        "service": control.get("service", "unknown"),
         "status": status,
         "severity": control["severity"] if status == "FAIL" else "INFO",
         "resource": resource,
